@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+
+<Configuration>
+	<!--
+	Log Levels Hierarchy:
+	OFF
+	FATAL
+	ERROR
+	WARN
+	INFO
+	DEBUG
+	TRACE
+	ALL 
+	 -->
+	<Properties>
+		<Property name="application.name">api</Property>
+		<Property name="pattern">%d{ISO8601}{GMT} | %p | %C{1.}:%L | %t | %msg%n</Property>
+		<Property name="catalina.home">.</Property>
+	</Properties>
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+		</Console>
+		<RollingFile name="Error" fileName="${sys:catalina.home}/logs/${application.name}_error.log"
+				 filePattern="${sys:catalina.home}/logs/${application.name}_error-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" /><!-- Rotated everyday -->
+				<SizeBasedTriggeringPolicy size="700 MB" /><!-- Or every specified file size -->
+			</Policies>
+			<DefaultRolloverStrategy max="7" /><!-- Max number of files to keep -->
+			<Filters>
+				<ThresholdFilter level="ERROR" />
+				<ThresholdFilter level="FATAL" onMatch="DENY" onMismatch="NEUTRAL" />
+			</Filters>
+		</RollingFile>
+		<RollingFile name="Warn" fileName="${sys:catalina.home}/logs/${application.name}_warn.log"
+				 filePattern="${sys:catalina.home}/logs/${application.name}_warn-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="700 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="7" />
+			<Filters>
+				<ThresholdFilter level="WARN" />
+				<ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL" />
+			</Filters>
+		</RollingFile>
+		<RollingFile name="Info" fileName="${sys:catalina.home}/logs/${application.name}.log"
+				 filePattern="${sys:catalina.home}/logs/${application.name}-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="700 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="7" />
+			<Filters>
+				<ThresholdFilter level="TRACE" />
+				<ThresholdFilter level="WARN" onMatch="DENY" onMismatch="NEUTRAL" />
+			</Filters>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<AsyncLogger name="org.springframework" level="INFO" includeLocation="true" />
+		<AsyncLogger name="org.springframework.web" level="INFO" includeLocation="true" />
+		
+		<AsyncRoot level="INFO" includeLocation="true">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="Error" />
+			<AppenderRef ref="Warn" />
+			<AppenderRef ref="Info" />
+		</AsyncRoot>
+	</Loggers>
+</Configuration>
