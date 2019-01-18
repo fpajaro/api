@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.projects.api.model.Category;
+import com.projects.api.payload.request.CategoryRequest;
 import com.projects.api.payload.response.CategoryResponse;
 import com.projects.api.repository.CategoryRepository;
 import com.projects.api.util.CategoryMapper;
@@ -26,5 +27,16 @@ public class CategoryService{
 		.collect(Collectors.toList());
 		
 		return categories;
+	}
+	
+	public CategoryResponse createCategory(CategoryRequest categoryRequest){
+		
+		Category category = new Category();
+		
+		category.setName(categoryRequest.getName());
+		
+		categoryRepository.save(category);
+		
+		return CategoryMapper.mapCategoryToCategoryResponse(category);
 	}
 }
