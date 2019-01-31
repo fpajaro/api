@@ -1,15 +1,30 @@
 package com.projects.api.model;
 
-import org.hibernate.annotations.NaturalId;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.projects.api.model.audit.DateAudit;
-
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.HashSet;
-import java.util.Set;
+
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.NaturalId;
+
+import com.projects.api.model.audit.DateAudit;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -51,6 +66,17 @@ public class User extends DateAudit {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+    
+    @OneToMany(
+    		mappedBy = "user",
+    		cascade = CascadeType.ALL,
+    		fetch = FetchType.EAGER,
+    		orphanRemoval = true
+    )
+    @Size(min = 1, max = 10)
+    @Fetch(FetchMode.SELECT)
+    @BatchSize(size = 30)
+    private Set<Claim> claims = new HashSet<>();
 
     public User() {
 
@@ -110,4 +136,22 @@ public class User extends DateAudit {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+	public Set<Claim> getClaims(){
+		return claims;
+	}
+
+	public void setClaims(Set<Claim> claims){
+		this.claims = claims;
+	}
+	
+	public void addClaim(Claim claim){
+		claims.add(claim);
+		claim.setUser(this);
+	}
+	
+	public void removeClaim(Claim claim){
+		claims.remove(claim);
+		claim.setUser(null);
+	}
 }

@@ -1,6 +1,7 @@
 package com.projects.api.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.projects.api.model.Claim;
 import com.projects.api.model.User;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -8,7 +9,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -29,20 +32,29 @@ public class UserPrincipal implements UserDetails {
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
+    
+    private Map<String, Boolean> claims = new HashMap<>();
 
-    public UserPrincipal(Long id, String name, String username, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UserPrincipal(Long id, String name, String username, String email, String password, Collection<? extends GrantedAuthority> authorities, Map<String, Boolean> claims) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
+        this.claims = claims;
     }
 
     public static UserPrincipal create(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
+        
+    	List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
                 new SimpleGrantedAuthority(role.getName().name())
         ).collect(Collectors.toList());
+    	
+    	Map<String, Boolean> claims = new HashMap<>();
+    	for(Claim claim : user.getClaims()){
+    		claims.put(claim.getType().name(), claim.getValue());
+    	}
 
         return new UserPrincipal(
                 user.getId(),
@@ -50,7 +62,8 @@ public class UserPrincipal implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                authorities
+                authorities,
+                claims
         );
     }
 
@@ -114,4 +127,12 @@ public class UserPrincipal implements UserDetails {
 
         return Objects.hash(id);
     }
+
+	public Map<String, Boolean> getClaims(){
+		return claims;
+	}
+
+	public void setClaims(Map<String, Boolean> claims){
+		this.claims = claims;
+	}
 }

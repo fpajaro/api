@@ -74,7 +74,7 @@
 		<AsyncLogger name="org.springframework" level="INFO" includeLocation="true" />
 		<AsyncLogger name="org.springframework.web" level="INFO" includeLocation="true" />
 		
-		<AsyncRoot level="INFO" includeLocation="true">
+		<AsyncRoot level="DEBUG" includeLocation="true">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="Error" />
 			<AppenderRef ref="Warn" />
